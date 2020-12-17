@@ -12,6 +12,8 @@ import ensureAuthenticated from '../middlewares/ensureAuthenticated'
 import s3Upload from '../middlewares/awsS3Upload';
 
 import User from '../models/User';
+import s3Upload from '../middlewares/awsS3Upload';
+
 import { create } from 'domain';
 
 
@@ -38,7 +40,11 @@ usersRouter.post('/profile', async (request, response) => {
 // Rota cadastro
 usersRouter.post('/signup', s3Upload({}).single('file'), async (request, response) => {
 	try {
-		const { username, email, password, avatar } = request.body;
+		const { username, email, password, birthdate, gender, phone } = request.body;
+
+		const { file } = request;
+		const avatar = (file as any).location;
+
 
 		const createUser = new CreateUserService();
 
@@ -46,7 +52,10 @@ usersRouter.post('/signup', s3Upload({}).single('file'), async (request, respons
 			username,
 			email,
 			password,
-			avatar
+			birthdate,
+			avatar,
+			gender,
+			phone,
 		});
 
 		if (created) {
@@ -60,10 +69,10 @@ usersRouter.post('/signup', s3Upload({}).single('file'), async (request, respons
 // Rota editar usuário
 usersRouter.put('/profile/edit', async (request, response) => {
 	try {
-		const { token, first_name, last_name, email, password } = request.body;
+		const { token, username, email, password, birthdate } = request.body;
 
 		const editUser = new EditUserService();
-		const isEdited = await editUser.execute({ token, first_name, last_name, email, password });
+		const isEdited = await editUser.execute({ token, username, email, birthdate, password });
 
 		return response.status(200).json({ status: 1 });
 	} catch (err) {

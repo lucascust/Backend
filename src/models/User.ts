@@ -7,7 +7,7 @@ class User {
 	id: string;
 
 	@Column()
-	username:string;
+	username: string;
 
 	@Column({ unique: true })
 	email: string;
@@ -17,6 +17,15 @@ class User {
 
 	@Column()
 	avatar: string;
+
+	@Column()
+	phone: string;
+
+	@Column()
+	gender: string;
+
+	@Column()
+	birthdate: Date;
 
 	@CreateDateColumn()
 	created_at: Date;
