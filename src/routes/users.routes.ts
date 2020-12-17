@@ -9,6 +9,7 @@ import { getRepository } from 'typeorm';
 import CreateUserService from '../services/CreateUserService';
 import EditUserService from '../services/EditUserService';
 import ensureAuthenticated from '../middlewares/ensureAuthenticated'
+import s3Upload from '../middlewares/awsS3Upload';
 
 import User from '../models/User';
 import { create } from 'domain';
@@ -35,15 +36,14 @@ usersRouter.post('/profile', async (request, response) => {
 });
 
 // Rota cadastro
-usersRouter.post('/signup', async (request, response) => {
+usersRouter.post('/signup', s3Upload({}).single('file'), async (request, response) => {
 	try {
-		const { first_name, last_name, email, password, avatar } = request.body;
+		const { username, email, password, avatar } = request.body;
 
 		const createUser = new CreateUserService();
 
 		const created = await createUser.execute({
-			first_name,
-			last_name,
+			username,
 			email,
 			password,
 			avatar
