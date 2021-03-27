@@ -19,9 +19,9 @@ class AuthenticateUserService {
 		const usersRepository = getRepository(User);
 
 		const user = await usersRepository.findOne({ where: { email, password } });
-
+		// console.log(user);
 		if (!user) {
-			throw new Error('Combinação de email e senha incorreta.');
+			throw new Error(0); // 'Combinação de email e senha incorreta.'
 		}
 
 		// user.password - Senha criptografada
@@ -35,22 +35,24 @@ class AuthenticateUserService {
 
 		// A partir daqui o usuário está autenticado
 
-		const { secret, expiresIn } = authConfig.jwt;
+		if (user.verified) {
+			const { secret, expiresIn } = authConfig.jwt;
 
-		// 1 Parâmetro: Infos sobre usuário (permissoes, dados)
-		const token = sign({}, secret, {
-			subject: user.id,
-			expiresIn,
-			// explorar refresh token posteriormente
-		});
+			// 1 Parâmetro: Infos sobre usuário (permissoes, dados)
+			const token = sign({}, secret, {
+				subject: user.id,
+				expiresIn,
+				// explorar refresh token posteriormente
+			});
 
-		return {
-			user,
-			token,
-		};
-
+			return {
+				user,
+				token,
+			};
+		} else {
+			throw new Error(1); // 'Email não vefiricado.
+		}
 	}
-
 }
 
 export default AuthenticateUserService;

@@ -1,4 +1,5 @@
-# Backend YouToba
+![](https://cdn.discordapp.com/attachments/300483456440336385/790758509138411612/nintube_icon1.png)
+# Backend NinTube
 
 Backend do trabalho de um sistema clone do Youtube para disciplina de AIC 4 da Universidade Federal De Rio Grande
 

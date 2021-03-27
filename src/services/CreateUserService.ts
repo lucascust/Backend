@@ -19,7 +19,7 @@ class CreateUserService {
 		//const customRepository = getCustomRepository()
 		const userRepository = getRepository(User);
 
-s
+
 		const created_at = new Date();
 		const updated_at = new Date();
 
@@ -27,7 +27,6 @@ s
 			username,
 			email,
 			password,
-			birthdate,
 			created_at,
 			updated_at,
 			avatar,
