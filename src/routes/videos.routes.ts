@@ -13,6 +13,8 @@ import ActionVideoService from '../services/videos/ActionVideoService';
 import ReportService from '../services/getData/ReportService';
 import GetPlayerService from '../services/videos/GetPlayerService';
 import ListVideoService from '../services/videos/ListVideoService';
+import DeleteVideoService from '../services/videos/DeleteVideoService';
+import GetRecommendedService from '../services/recommended/GetRecommendedService';
 
 import uploadWithId from '../middlewares/awsUpload';
 import checkJwt from '../middlewares/checkJwt';
@@ -30,7 +32,7 @@ const videosRouter = Router();
 // videosRouter.post('/send', s3Upload({}).single('file'), async (req, res) => {
 videosRouter.post('/send', async (req, res) => {
 	try {
-		const { file, title, description, privacy, thumb } = req.body;
+		const { file, title, description, privacy, thumb, tags } = req.body;
 		if (req.headers.authorization) {
 			const token = req.headers.authorization;
 
@@ -52,6 +54,7 @@ videosRouter.post('/send', async (req, res) => {
 					description,
 					privacy,
 					thumb,
+					tags,
 				});
 			} catch (e) {
 				console.log(e);
@@ -69,7 +72,7 @@ videosRouter.post('/send', async (req, res) => {
 
 videosRouter.put('/edit', async (req, res) => {
 	try {
-		const { file, title, description, privacy, thumb, video_id } = req.body;
+		const { file, title, description, privacy, thumb, video_id, tags } = req.body;
 		if (req.headers.authorization) {
 			const token = req.headers.authorization;
 
@@ -85,6 +88,7 @@ videosRouter.put('/edit', async (req, res) => {
 					privacy,
 					thumb,
 					video_id,
+					tags,
 				});
 			} catch (e) {
 				console.log(e);
@@ -160,8 +164,11 @@ videosRouter.post('/getData', async (req, res) => {
 			const video = new DataVideoService();
 
 			const videoData = await video.execute({ token, video_id });
+			const tag = new GetRecommendedService();
 
-			res.status(200).json(videoData);
+			const status = await tag.execute({});
+
+			res.status(200).json({ videoData, rec: status });
 		} else {
 			throw new Error('Token não recebido.');
 		}
@@ -214,7 +221,7 @@ videosRouter.post('/liked', async (req, res) => {
 	try {
 		var { token, video_id, liked } = req.body;
 		// console.log(req.body);
-		if (typeof video_id !== 'string') {
+		if (typeof token !== 'string') {
 			throw new Error('id do video deve ser uma string.');
 		}
 		if (token && video_id) {
@@ -236,8 +243,7 @@ videosRouter.post('/liked', async (req, res) => {
 videosRouter.put('/report', async (req, res) => {
 	try {
 		var { token, video_id, report_text, report_option } = req.body;
-		console.log(req.body);
-		if (typeof video_id !== 'string') {
+		if (typeof video_id !== 'string' || typeof token !== 'string') {
 			throw new Error('id do video deve ser uma string.');
 		}
 		if (token && video_id) {
@@ -254,7 +260,28 @@ videosRouter.put('/report', async (req, res) => {
 
 			res.status(200).json(sendReport);
 		} else {
-			throw new Error('Token não recebido.');
+			throw new Error('Token ou Id doS video não recebido.');
+		}
+	} catch (err) {
+		console.log(err);
+	}
+});
+
+videosRouter.post('/delet', async (req, res) => {
+	// watch?v=DQMWPDM1P2M&t=20s
+	try {
+		var { video_id } = req.body;
+		if (typeof video_id !== 'string') {
+			throw new Error('id do video deve ser uma string.');
+		}
+		if (video_id) {
+			const delet_video = new DeleteVideoService();
+
+			const status = await delet_video.execute({ video_id });
+
+			res.status(200).json(status);
+		} else {
+			throw new Error('Id do video não recebido.');
 		}
 	} catch (err) {
 		console.log(err);

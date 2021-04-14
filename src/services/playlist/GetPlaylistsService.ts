@@ -28,6 +28,7 @@ class GetPlaylistsService {
 					const data = await playlistRepository.find({
 						select: ['id', 'name', 'created_at'],
 						where: { user_id: user_id },
+						order: { created_at: 'ASC' },
 					});
 					var newData = Array();
 					for (let i = 0; i < data.length; i++) {
@@ -58,7 +59,6 @@ class GetPlaylistsService {
 						select: ['id', 'name', 'created_at'],
 						where: { user_id: id_target, public: true },
 					});
-					console.log(id_target);
 					var newData = Array();
 					for (let i = 0; i < data.length; i++) {
 						const allVideos = await playlistVideoRepo.find({

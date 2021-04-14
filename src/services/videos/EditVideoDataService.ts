@@ -5,6 +5,7 @@ import checkJwt from '../../middlewares/checkJwt';
 
 import UserVideo from '../../models/UserVideo';
 import Video from '../../models/Video';
+import TagsVideo from '../../models/TagsVideo';
 
 interface Request {
 	token: string;
@@ -14,6 +15,7 @@ interface Request {
 	privacy: boolean;
 	thumb: string;
 	video_id: string;
+	tags: [];
 }
 
 class EditVideoDataService {
@@ -25,10 +27,12 @@ class EditVideoDataService {
 		thumb,
 		file,
 		video_id,
+		tags,
 	}: Request): Promise<number> {
 		try {
 			const videoRepository = getRepository(Video);
 			const userVideoRepository = getRepository(UserVideo);
+			const tagsVideoRepo = getRepository(TagsVideo);
 
 			const user_id = checkJwt(token).sub;
 
@@ -72,27 +76,21 @@ class EditVideoDataService {
 						thumb,
 					});
 				}
-				// const video = await videoRepository.save({
-				// 	file,
-				// 	description,
-				// 	title,
-				// 	created_at,
-				// 	privacy,
-				// 	thumb,
-				// });
-
-				// // LEMBRAR: E SE ISSO DER ERRO? JÁ VAI TER SALVO NO BANCO ANTERIOR E O VIDEO ESTARA NO SERVIDOR
-				// await userVideoRepository.save({
-				// 	user_id,
-				// 	video_id: video.id,
-				// 	liked: 0,
-				// 	reported: false,
-				// 	report_option: '',
-				// 	report_text: '',
-				// 	watches: 0,
-				// 	is_owner: true,
-				// 	created_at,
-				// });
+				const tag_video = await tagsVideoRepo.find({
+					where: { video_id },
+				});
+				for (let i = 0; i < tag_video.length; i++) {
+					await tagsVideoRepo.delete({
+						id: tag_video[i].id,
+					});
+				}
+				for (let i = 0; i < tags.length; i++) {
+					await tagsVideoRepo.save({
+						video_id,
+						tag_id: tags[i],
+						created_at,
+					});
+				}
 				return 1;
 			} else {
 				throw new Error('Erro ao resgatar repositório de vídeo.');
